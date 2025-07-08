@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Interactive Data Visualization Generator</title>
+    <meta name="description" content="Create stunning interactive data visualizations with real-time processing and multiple chart types">
+    <script>
+      // Theme persistence - Load saved theme before content loads
+      const savedTheme = localStorage.getItem('theme') || 'light';
+      if (savedTheme === 'dark') {
+        document.documentElement.classList.add('dark');
+      }
+    </script>
+  </head>
+  <body class="antialiased">
+    <div id="app" class="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+      <!-- Header -->
+      <header class="glass-effect sticky top-0 z-50 border-b border-gray-200 dark:border-gray-700 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="flex items-center justify-between h-16">
+            <!-- Logo -->
+            <div class="flex items-center space-x-2">
+              <span class="text-3xl">📊</span>
+              <h1 class="text-xl font-bold gradient-text">DataViz Generator</h1>
+            </div>
+
+            <!-- Navigation -->
+            <nav class="hidden md:flex items-center space-x-1">
+              <button class="nav-btn px-4 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-800 transition-all duration-200 active" data-section="dashboard">
+                Dashboard
+              </button>
+              <button class="nav-btn px-4 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-800 transition-all duration-200" data-section="charts">
+                Charts
+              </button>
+              <button class="nav-btn px-4 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-800 transition-all duration-200" data-section="data">
+                Data
+              </button>
+              <button class="nav-btn px-4 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-800 transition-all duration-200" data-section="themes">
+                Themes
+              </button>
+            </nav>
+
+            <!-- Controls -->
+            <div class="flex items-center space-x-3">
+              <button id="realtime-toggle" class="toggle-btn flex items-center space-x-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 text-sm font-medium">
+                <span class="toggle-icon">🔴</span>
+                <span class="hidden sm:inline">Real-time: OFF</span>
+              </button>
+              <button id="theme-toggle" class="theme-btn p-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 text-lg">
+                🌙
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Main Content -->
+      <div class="flex flex-1 max-w-7xl mx-auto w-full">
+        <!-- Sidebar -->
+        <aside class="w-80 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 p-6 overflow-y-auto custom-scrollbar">
+          <!-- Chart Types -->
+          <div class="mb-8">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Chart Types</h3>
+            <div class="space-y-2">
+              <button class="chart-type-btn w-full flex items-center space-x-3 p-4 bg-blue-500 text-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 card-hover active" data-type="bar">
+                <span class="text-xl">📊</span>
+                <span class="font-medium">Bar Chart</span>
+              </button>
+              <button class="chart-type-btn w-full flex items-center space-x-3 p-4 bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 card-hover" data-type="line">
+                <span class="text-xl">📈</span>
+                <span class="font-medium">Line Chart</span>
+              </button>
+              <button class="chart-type-btn w-full flex items-center space-x-3 p-4 bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 card-hover" data-type="pie">
+                <span class="text-xl">🥧</span>
+                <span class="font-medium">Pie Chart</span>
+              </button>
+              <button class="chart-type-btn w-full flex items-center space-x-3 p-4 bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 card-hover" data-type="scatter">
+                <span class="text-xl">🔍</span>
+                <span class="font-medium">Scatter Plot</span>
+              </button>
+              <button class="chart-type-btn w-full flex items-center space-x-3 p-4 bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 card-hover" data-type="heatmap">
+                <span class="text-xl">🌡️</span>
+                <span class="font-medium">Heatmap</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Data Controls -->
+          <div class="mb-8">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Data Controls</h3>
+            <div class="space-y-3">
+              <button id="generate-data" class="btn-primary w-full">Generate Sample Data</button>
+              <button id="upload-data" class="btn-secondary w-full">Upload CSV</button>
+              <input type="file" id="file-input" accept=".csv,.json" class="hidden">
+              <button id="clear-data" class="btn-danger w-full">Clear Data</button>
+            </div>
+          </div>
+
+          <!-- Export Options -->
+          <div class="mb-8">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Export Options</h3>
+            <div class="space-y-3">
+              <button id="export-png" class="btn-secondary w-full">Export PNG</button>
+              <button id="export-svg" class="btn-secondary w-full">Export SVG</button>
+              <button id="export-json" class="btn-secondary w-full">Export JSON</button>
+            </div>
+          </div>
+
+          <!-- Settings -->
+          <div class="mb-8">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Settings</h3>
+            <div class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Animation Speed
+                </label>
+                <input type="range" id="animation-speed" min="100" max="2000" value="800" class="input-range">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Data Points
+                </label>
+                <input type="range" id="data-points" min="5" max="100" value="20" class="input-range">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Update Interval (ms)
+                </label>
+                <input type="range" id="update-interval" min="500" max="5000" value="1500" class="input-range">
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        <!-- Content Area -->
+        <main class="flex-1 p-6 overflow-y-auto custom-scrollbar">
+          <!-- Chart Container -->
+          <div class="chart-container bg-white dark:bg-gray-800 rounded-xl shadow-lg mb-8 overflow-hidden card-hover animate-fade-in">
+            <div class="chart-header p-6 border-b border-gray-200 dark:border-gray-700">
+              <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
+                <h2 id="chart-title" class="text-2xl font-bold text-gray-900 dark:text-white">Interactive Bar Chart</h2>
+                <div class="flex items-center space-x-6 text-sm text-gray-500 dark:text-gray-400">
+                  <span id="data-count" class="flex items-center space-x-1">
+                    <span class="w-2 h-2 bg-green-500 rounded-full pulse-slow"></span>
+                    <span>20 data points</span>
+                  </span>
+                  <span id="last-update" class="flex items-center space-x-1">
+                    <span class="w-2 h-2 bg-blue-500 rounded-full"></span>
+                    <span>Last updated: Never</span>
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div class="chart-wrapper relative p-8 min-h-96 flex items-center justify-center">
+              <canvas id="main-chart" class="max-w-full max-h-96 rounded-lg"></canvas>
+              <div id="chart-tooltip" class="tooltip absolute bg-gray-900 text-white px-3 py-2 rounded-lg text-sm pointer-events-none opacity-0 transition-opacity duration-200 z-50 shadow-lg"></div>
+            </div>
+          </div>
+
+          <!-- Data Preview -->
+          <div class="data-preview bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden card-hover animate-fade-in">
+            <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+              <h3 class="text-xl font-bold text-gray-900 dark:text-white">Data Preview</h3>
+            </div>
+            <div class="data-table-container max-h-80 overflow-auto custom-scrollbar">
+              <table id="data-table" class="w-full">
+                <thead class="bg-gray-50 dark:bg-gray-700 sticky top-0">
+                  <tr id="table-header"></tr>
+                </thead>
+                <tbody id="table-body" class="divide-y divide-gray-200 dark:divide-gray-600">
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </main>
+      </div>
+
+      <!-- Loading Overlay -->
+      <div id="loading" class="loading fixed inset-0 bg-black bg-opacity-50 flex flex-col items-center justify-center z-50 opacity-0 invisible transition-all duration-300">
+        <div class="loading-spinner mb-4"></div>
+        <p class="text-white text-lg font-medium">Processing data...</p>
+      </div>
+
+      <!-- Notification Container -->
+      <div id="notification-container" class="fixed top-20 right-4 z-50 flex flex-col space-y-2"></div>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
